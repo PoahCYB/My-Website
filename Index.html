@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Noah Lewis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --red: #ff4d4d;
+      --red-dim: rgba(255, 77, 77, 0.15);
+      --bg: #080810;
+      --bg2: #0f0f1a;
+      --border: rgba(255,255,255,0.08);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.45);
+      --card-bg: rgba(255,255,255,0.03);
+    }
+ 
+    html { scroll-behavior: smooth; }
+ 
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+ 
+    /* ── Stars canvas ── */
+    #stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+ 
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3rem;
+      background: rgba(8,8,16,0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 0.5px solid var(--border);
+    }
+ 
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.5px;
+      text-decoration: none;
+    }
+ 
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+ 
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+    }
+ 
+    .nav-links a:hover { color: var(--text); }
+ 
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 6rem;
+    }
+ 
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+ 
+    .hero-name {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(52px, 9vw, 96px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+ 
+    .hero-name span { color: var(--red); }
+ 
+    .hero-sub {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.6s forwards;
+    }
+ 
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.8s forwards;
+    }
+ 
+    .btn-primary {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+ 
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+ 
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 0.5px solid rgba(255,255,255,0.2);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 400;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+ 
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.4); transform: translateY(-1px); }
+ 
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: fadeUp 0.7s 1.2s forwards;
+    }
+ 
+    .scroll-hint span {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+    }
+ 
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+ 
+    @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+ 
+    /* ── Sections ── */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+ 
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1rem;
+    }
+ 
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+ 
+    .section-sub {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 480px;
+      line-height: 1.75;
+      margin-bottom: 3rem;
+    }
+ 
+    /* ── Skills grid ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+ 
+    .skill-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+ 
+    .skill-card:hover {
+      border-color: rgba(255,77,77,0.3);
+      background: var(--red-dim);
+      transform: translateY(-2px);
+    }
+ 
+    .skill-icon {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--red);
+    }
+ 
+    .skill-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+ 
+    .skill-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+ 
+    /* ── Projects grid ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+ 
+    .project-card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+ 
+    .project-card:hover {
+      border-color: rgba(255,77,77,0.3);
+      background: var(--red-dim);
+      transform: translateY(-3px);
+    }
+ 
+    .project-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--red);
+      background: var(--red-dim);
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+ 
+    .project-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+ 
+    .project-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+ 
+    .project-link {
+      font-size: 13px;
+      color: var(--red);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s;
+    }
+ 
+    .project-link:hover { gap: 8px; }
+ 
+    /* ── Contact ── */
+    .contact-box {
+      background: var(--card-bg);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+    }
+ 
+    .contact-email {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 700;
+      color: var(--red);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+ 
+    .contact-email:hover { opacity: 0.75; }
+ 
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 0.5px solid var(--border);
+      font-size: 13px;
+      color: rgba(255,255,255,0.2);
+    }
+ 
+    /* ── Divider ── */
+    .section-divider {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      height: 0.5px;
+      background: var(--border);
+    }
+ 
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+</head>
+<body>
+
+    <canvas id="stars"></canvas>
+
+<!---Nav Bar-->
+    <nav>
+        <a class="nav-logo" href="#">Noah Lewis</a>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+<!---Hero-->
+    <div class="hero">
+        <p class="hero-eyebrow">Portfolio</p>
+        <h1 class="hero-name">Noah <span>Lewis</span></h1>
+        <p class="hero-sub">Cyber Security student pursuing a bachelors degree. With a passion for technology and computers.</p>
+        <div class="hero-btns">
+            <a href="#projects" class="btn-primary">View Projects</a>
+            <a href="#contact" class="btn-ghost">Get in Touch</a>
+        </div>
+        <div class="scroll-hint">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </div>
+
+<div class="section-divider"></div>
+
+<!---About / Skills-->
+<section id="about">
+  <p class="section-label">About</p>
+  <h2 class="section-title">What I do</h2>
+  <p class="section-sub">I am a Cybersecurity student going into my senior year, eager to break into the industry. I have always had a passion for technology and how systems can be protected and exploited.</p>
+  <div class="skills-grid">
+
+    <div class="skill-card">
+      <div class="skill-icon">💻</div>
+      <div class="skill-name">Kali Linux</div>
+      <div class="skill-desc">Well versed in navigating Kali Linux, using the terminal and common pentesting tools.</div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🌐</div>
+      <div class="skill-name">Network Security</div>
+      <div class="skill-desc">Experience with Wireshark, Nmap, and analyzing network traffic for threats.</div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🐍</div>
+      <div class="skill-name">Python</div>
+      <div class="skill-desc">I understand how to code using Python</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!---Projects-->
+<section id="projects">
+    <p class="section-lab">Work</p>
+    <h2 class="section-title">Projects</h2>
+    <p class="section-sub">Some of my projects.</p>
+    <div class="project-card">
+        <span class="project-tag">Web</span>
+        <div class="project-name">Random Guitar Note</div>
+        <p class="project-desc">I built this because I have been learning to play guitar this tool will randomize a note on the fretboard for you to play.</p>
+        <a href="https://PoahCYB.github.io/Random-Guitar-Note" class="project-link">View project &rarr;</a>
+    </div>
+    <div class="project-card">
+        <span class="project-tag">Scanner</span>
+        <div class="project-name">URL Scanner</div>
+        <p class="project-desc">This is a python script that checks a URL for unusual characteristics.</p>
+        <a href="https://github.com/PoahCYB/URL_Scanner" class="project-link">View on GitHub</a>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!---Contact-->
+<section id="contact">
+    <p class="section-label">Contact</p>
+    <h2 class="section-title">Get in Touch</h2>
+    <p class="section-sub">Want to reach out and message me? Send me an email.</p>
+    <div class="contact-box">
+        <p style="color:var(--muted); font-size:15px; margin-bottom: 1.25rem;">Email me</p>
+        <a href="mailto:23njlewis@gmail.com" class="contact-email">23njlewis@gmail.com</a>
+    </div>
+</section>
+
+<footer>
+    &copy; 2026 Noah Lewis
+</footer>
+
+<script>
+    // Starfield
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+ 
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+ 
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 120; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        alpha: Math.random(),
+        speed: 0.002 + Math.random() * 0.005,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+ 
+  function drawStars(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.alpha = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t * s.speed * 60 + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+      ctx.fill();
+    });
+  }
+ 
+  let raf;
+  function animate(t) {
+    drawStars(t / 1000);
+    raf = requestAnimationFrame(animate);
+  }
+ 
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  requestAnimationFrame(animate);
+ 
+  // Smooth active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    links.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current
+        ? '#ffffff' : '';
+    });
+  });
+</script>
+</body>
+</html>
